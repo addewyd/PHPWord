@@ -277,4 +277,34 @@ abstract class AbstractContainer extends AbstractElement
     {
         return $this->addFootnote($paragraphStyle);
     }
+    
+    /**
+     * Import another doc
+     *
+     * from stackoverflow
+     *
+     * @param array $elements
+     *
+     */
+    public function addElementsFromAnotherPhpWord(array $elements) {
+        $count = count($elements);
+        for ($i = 0; $i < $count; ++$i) {
+            $element = $elements[$i];
+            $element->setParentContainer($this);
+            $this->reassignElementProperties($this, $element);
+            $this->elements[] = $element;
+       }
+    }
+    protected function reassignElementProperties($parent, $element) {
+        // Set parent container (code from addElement() )
+        $element->setParentContainer($parent);
+        $element->setElementIndex($parent->countElements() + 1);
+        $element->setElementId();
+
+        // Recursive on sub-elements
+        $count = count($element->elements);
+        for ($i = 0; $i < $count; ++$i) {
+            $this->reassignElementProperties($element, $element->elements[$i]);
+        }
+
 }
