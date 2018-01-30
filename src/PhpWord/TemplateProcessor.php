@@ -10,8 +10,8 @@
  * file that was distributed with this source code. For the full list of
  * contributors, visit https://github.com/PHPOffice/PHPWord/contributors.
  *
- * @see         https://github.com/PHPOffice/PHPWord
- * @copyright   2010-2017 PHPWord contributors
+ * @link        https://github.com/PHPOffice/PHPWord
+ * @copyright   2010-2016 PHPWord contributors
  * @license     http://www.gnu.org/licenses/lgpl.txt LGPL version 3
  */
 
@@ -37,35 +37,35 @@ class TemplateProcessor
     protected $zipClass;
 
     /**
-     * @var string Temporary document filename (with path)
+     * @var string Temporary document filename (with path).
      */
     protected $tempDocumentFilename;
 
     /**
-     * Content of main document part (in XML format) of the temporary document
+     * Content of main document part (in XML format) of the temporary document.
      *
      * @var string
      */
     protected $tempDocumentMainPart;
 
     /**
-     * Content of headers (in XML format) of the temporary document
+     * Content of headers (in XML format) of the temporary document.
      *
      * @var string[]
      */
     protected $tempDocumentHeaders = array();
 
     /**
-     * Content of footers (in XML format) of the temporary document
+     * Content of footers (in XML format) of the temporary document.
      *
      * @var string[]
      */
     protected $tempDocumentFooters = array();
 
     /**
-     * @since 0.12.0 Throws CreateTemporaryFileException and CopyFileException instead of Exception
+     * @since 0.12.0 Throws CreateTemporaryFileException and CopyFileException instead of Exception.
      *
-     * @param string $documentTemplate The fully qualified template filename
+     * @param string $documentTemplate The fully qualified template filename.
      *
      * @throws \PhpOffice\PhpWord\Exception\CreateTemporaryFileException
      * @throws \PhpOffice\PhpWord\Exception\CopyFileException
@@ -101,15 +101,16 @@ class TemplateProcessor
             $index++;
         }
         $this->tempDocumentMainPart = $this->fixBrokenMacros($this->zipClass->getFromName($this->getMainPartName()));
+	$this->_countRels=100; //start id for relationship between image and document.xml
     }
 
     /**
      * @param string $xml
      * @param \XSLTProcessor $xsltProcessor
      *
-     * @throws \PhpOffice\PhpWord\Exception\Exception
-     *
      * @return string
+     *
+     * @throws \PhpOffice\PhpWord\Exception\Exception
      */
     protected function transformSingleXml($xml, $xsltProcessor)
     {
@@ -147,13 +148,15 @@ class TemplateProcessor
 
     /**
      * Applies XSL style sheet to template's parts.
-     *
+     * 
      * Note: since the method doesn't make any guess on logic of the provided XSL style sheet,
      * make sure that output is correctly escaped. Otherwise you may get broken document.
      *
      * @param \DOMDocument $xslDomDocument
      * @param array $xslOptions
      * @param string $xslOptionsUri
+     *
+     * @return void
      *
      * @throws \PhpOffice\PhpWord\Exception\Exception
      */
@@ -202,7 +205,9 @@ class TemplateProcessor
     /**
      * @param mixed $search
      * @param mixed $replace
-     * @param int $limit
+     * @param integer $limit
+     *
+     * @return void
      */
     public function setValue($search, $replace, $limit = self::MAXIMUM_REPLACEMENTS_DEFAULT)
     {
@@ -256,7 +261,9 @@ class TemplateProcessor
      * Clone a table row in a template document.
      *
      * @param string $search
-     * @param int $numberOfClones
+     * @param integer $numberOfClones
+     *
+     * @return void
      *
      * @throws \PhpOffice\PhpWord\Exception\Exception
      */
@@ -268,7 +275,7 @@ class TemplateProcessor
 
         $tagPos = strpos($this->tempDocumentMainPart, $search);
         if (!$tagPos) {
-            throw new Exception('Can not clone row, template variable not found or variable contains markup.');
+            throw new Exception("Can not clone row, template variable not found or variable contains markup.");
         }
 
         $rowStart = $this->findRowStart($tagPos);
@@ -313,8 +320,8 @@ class TemplateProcessor
      * Clone a block.
      *
      * @param string $blockname
-     * @param int $clones
-     * @param bool $replace
+     * @param integer $clones
+     * @param boolean $replace
      *
      * @return string|null
      */
@@ -351,6 +358,8 @@ class TemplateProcessor
      *
      * @param string $blockname
      * @param string $replacement
+     *
+     * @return void
      */
     public function replaceBlock($blockname, $replacement)
     {
@@ -373,6 +382,8 @@ class TemplateProcessor
      * Delete a block of text.
      *
      * @param string $blockname
+     *
+     * @return void
      */
     public function deleteBlock($blockname)
     {
@@ -382,9 +393,9 @@ class TemplateProcessor
     /**
      * Saves the result document.
      *
-     * @throws \PhpOffice\PhpWord\Exception\Exception
-     *
      * @return string
+     *
+     * @throws \PhpOffice\PhpWord\Exception\Exception
      */
     public function save()
     {
@@ -393,6 +404,14 @@ class TemplateProcessor
         }
 
         $this->zipClass->addFromString($this->getMainPartName(), $this->tempDocumentMainPart);
+        if($this->_rels!="")
+	{
+    		$this->zipClass->addFromString('word/_rels/document.xml.rels', $this->_rels);
+	}
+	if($this->_types!="")
+	{
+	    $this->zipClass->addFromString('[Content_Types].xml', $this->_types);
+	}
 
         foreach ($this->tempDocumentFooters as $index => $xml) {
             $this->zipClass->addFromString($this->getFooterName($index), $xml);
@@ -412,6 +431,8 @@ class TemplateProcessor
      * @since 0.8.0
      *
      * @param string $fileName
+     *
+     * @return void
      */
     public function saveAs($fileName)
     {
@@ -435,7 +456,7 @@ class TemplateProcessor
      * Finds parts of broken macros and sticks them together.
      * Macros, while being edited, could be implicitly broken by some of the word processors.
      *
-     * @param string $documentPart The document part in XML representation
+     * @param string $documentPart The document part in XML representation.
      *
      * @return string
      */
@@ -460,7 +481,7 @@ class TemplateProcessor
      * @param mixed $search
      * @param mixed $replace
      * @param string $documentPartXML
-     * @param int $limit
+     * @param integer $limit
      *
      * @return string
      */
@@ -469,10 +490,10 @@ class TemplateProcessor
         // Note: we can't use the same function for both cases here, because of performance considerations.
         if (self::MAXIMUM_REPLACEMENTS_DEFAULT === $limit) {
             return str_replace($search, $replace, $documentPartXML);
+        } else {
+            $regExpEscaper = new RegExp();
+            return preg_replace($regExpEscaper->escape($search), $replace, $documentPartXML, $limit);
         }
-        $regExpEscaper = new RegExp();
-
-        return preg_replace($regExpEscaper->escape($search), $replace, $documentPartXML, $limit);
     }
 
     /**
@@ -492,7 +513,7 @@ class TemplateProcessor
     /**
      * Get the name of the header file for $index.
      *
-     * @param int $index
+     * @param integer $index
      *
      * @return string
      */
@@ -512,7 +533,7 @@ class TemplateProcessor
     /**
      * Get the name of the footer file for $index.
      *
-     * @param int $index
+     * @param integer $index
      *
      * @return string
      */
@@ -524,11 +545,11 @@ class TemplateProcessor
     /**
      * Find the start position of the nearest table row before $offset.
      *
-     * @param int $offset
+     * @param integer $offset
+     *
+     * @return integer
      *
      * @throws \PhpOffice\PhpWord\Exception\Exception
-     *
-     * @return int
      */
     protected function findRowStart($offset)
     {
@@ -547,9 +568,9 @@ class TemplateProcessor
     /**
      * Find the end position of the nearest table row after $offset.
      *
-     * @param int $offset
+     * @param integer $offset
      *
-     * @return int
+     * @return integer
      */
     protected function findRowEnd($offset)
     {
@@ -559,8 +580,8 @@ class TemplateProcessor
     /**
      * Get a slice of a string.
      *
-     * @param int $startPosition
-     * @param int $endPosition
+     * @param integer $startPosition
+     * @param integer $endPosition
      *
      * @return string
      */
@@ -571,5 +592,94 @@ class TemplateProcessor
         }
 
         return substr($this->tempDocumentMainPart, $startPosition, ($endPosition - $startPosition));
+    }
+
+
+public function setImg( $strKey, $img){
+        $strKey = '${'.$strKey.'}';
+        $relationTmpl = '<Relationship Id="RID" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/IMG"/>';
+
+        $imgTmpl = '<w:pict><v:shape type="#_x0000_t75" style="width:WIDpx;height:HEIpx"><v:imagedata r:id="RID" o:title=""/></v:shape></w:pict>';
+
+        $toAdd = $toAddImg = $toAddType = '';
+        $aSearch = array('RID', 'IMG');
+        $aSearchType = array('IMG', 'EXT');
+        $countrels=$this->_countRels++;
+        //I'm work for jpg files, if you are working with other images types -> Write conditions here
+    $imgExt = 'jpg';
+        $imgName = 'img' . $countrels . '.' . $imgExt;
+
+            $this->zipClass->deleteName('word/media/' . $imgName);
+            $this->zipClass->addFile($img['src'], 'word/media/' . $imgName);
+
+            $typeTmpl = '<Override PartName="/word/media/'.$imgName.'" ContentType="image/EXT"/>';
+
+
+            $rid = 'rId' . $countrels;
+            $countrels++;
+        list($w,$h) = getimagesize($img['src']);
+
+ if(isset($img['swh'])) //Image proportionally larger side
+ {
+ if($w<=$h)
+ {
+    $ht=(int)$img['swh'];
+    $ot=$w/$h;
+    $wh=(int)$img['swh']*$ot;
+    $wh=round($wh);
+ }
+ if($w>=$h)
+ {
+    $wh=(int)$img['swh'];
+    $ot=$h/$w;
+    $ht=(int)$img['swh']*$ot;
+    $ht=round($ht);
+ }
+ $w=$wh;
+ $h=$ht;
+ }
+
+if(isset($img['size']))
+{
+$w = $img['size'][0];
+$h = $img['size'][1];           
+}
+
+
+            $toAddImg .= str_replace(array('RID', 'WID', 'HEI'), array($rid, $w, $h), $imgTmpl) ;
+            if(isset($img['dataImg']))
+            {
+                $toAddImg.='<w:br/><w:t>'.$this->limpiarString($img['dataImg']).'</w:t><w:br/>';
+            }
+
+            $aReplace = array($imgName, $imgExt);
+            $toAddType .= str_replace($aSearchType, $aReplace, $typeTmpl) ;
+
+            $aReplace = array($rid, $imgName);
+            $toAdd .= str_replace($aSearch, $aReplace, $relationTmpl);
+
+
+        $this->tempDocumentMainPart=str_replace('<w:t>' . $strKey . '</w:t>', $toAddImg, $this->tempDocumentMainPart);
+        //print $this->tempDocumentMainPart;
+
+
+
+        if($this->_rels=="")
+        {
+            $this->_rels=$this->zipClass->getFromName('word/_rels/document.xml.rels');
+            $this->_types=$this->zipClass->getFromName('[Content_Types].xml');
+        }
+
+        $this->_types       = str_replace('</Types>', $toAddType, $this->_types) . '</Types>';
+                $this->_rels        = str_replace('</Relationships>', $toAdd, $this->_rels) . '</Relationships>';
+    }
+//add function
+
+    function limpiarString($str) {
+        return str_replace(
+                array('&', '<', '>', "\n"), 
+                array('&amp;', '&lt;', '&gt;', "\n" . '<w:br/>'), 
+                $str
+        );
     }
 }
