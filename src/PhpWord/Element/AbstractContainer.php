@@ -307,4 +307,5 @@ abstract class AbstractContainer extends AbstractElement
             $this->reassignElementProperties($element, $element->elements[$i]);
         }
 
+    }
 }
