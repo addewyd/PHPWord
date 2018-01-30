@@ -36,7 +36,7 @@ namespace PhpOffice\PhpWord\Element;
  * @method PageBreak addPageBreak()
  * @method Table addTable(mixed $style = null)
  * @method Image addImage(string $source, mixed $style = null, bool $isWatermark = false)
- * @method \PhpOffice\PhpWord\Element\Object addObject(string $source, mixed $style = null)
+ * @method OLEObject addOLEObject(string $source, mixed $style = null)
  * @method TextBox addTextBox(mixed $style = null)
  * @method Field addField(string $type = null, array $properties = array(), array $options = array(), mixed $text = null)
  * @method Line addLine(mixed $lineStyle = null)
@@ -44,6 +44,8 @@ namespace PhpOffice\PhpWord\Element;
  * @method Chart addChart(string $type, array $categories, array $values, array $style = null)
  * @method FormField addFormField(string $type, mixed $fStyle = null, mixed $pStyle = null)
  * @method SDT addSDT(string $type)
+ *
+ * @method \PhpOffice\PhpWord\Element\OLEObject addObject(string $source, mixed $style = null) deprecated, use addOLEObject instead
  *
  * @since 0.10.0
  */
@@ -86,7 +88,7 @@ abstract class AbstractContainer extends AbstractElement
         );
         $functions = array();
         foreach ($elements as $element) {
-            $functions['add' . strtolower($element)] = $element;
+            $functions['add' . strtolower($element)] = $element == 'Object' ? 'OLEObject' : $element;
         }
 
         // Run valid `add` command
@@ -192,14 +194,14 @@ abstract class AbstractContainer extends AbstractElement
             'Link'          => $generalContainers,
             'TextBreak'     => $generalContainers,
             'Image'         => $generalContainers,
-            'Object'        => $generalContainers,
+            'OLEObject'     => $generalContainers,
             'Field'         => $generalContainers,
             'Line'          => $generalContainers,
             'Shape'         => $generalContainers,
             'FormField'     => $generalContainers,
             'SDT'           => $generalContainers,
             'TrackChange'   => $generalContainers,
-            'TextRun'       => array('Section', 'Header', 'Footer', 'Cell', 'TextBox', 'TrackChange'),
+            'TextRun'       => array('Section', 'Header', 'Footer', 'Cell', 'TextBox', 'TrackChange', 'ListItemRun'),
             'ListItem'      => array('Section', 'Header', 'Footer', 'Cell', 'TextBox'),
             'ListItemRun'   => array('Section', 'Header', 'Footer', 'Cell', 'TextBox'),
             'Table'         => array('Section', 'Header', 'Footer', 'Cell', 'TextBox'),
@@ -275,7 +277,7 @@ abstract class AbstractContainer extends AbstractElement
     {
         return $this->addFootnote($paragraphStyle);
     }
-     
+    
     /**
      * Import another doc
      *
@@ -298,10 +300,12 @@ abstract class AbstractContainer extends AbstractElement
         $element->setParentContainer($parent);
         $element->setElementIndex($parent->countElements() + 1);
         $element->setElementId();
+
         // Recursive on sub-elements
         $count = count($element->elements);
         for ($i = 0; $i < $count; ++$i) {
             $this->reassignElementProperties($element, $element->elements[$i]);
         }
+
     }
 }
